@@ -9,6 +9,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { AuthService } from 'src/gateway/services/auth/auth.service';
+import { UpdateRoleDto, UpdateRoleResponseDto } from './services/notification/dto/update-role.dto';
 
 @WebSocketGateway({ namespace: 'notifications', cors: true })
 export class NotificationsGateway
@@ -95,35 +96,84 @@ export class NotificationsGateway
     }
   }
 
+  // @SubscribeMessage('admin')
+  // handleActionAdmin(
+  //   @MessageBody() data: any,
+  //   @ConnectedSocket() client: Socket,
+  // ) {
+  //   const adminId = this.activeUsers.get(client.id);
+  //   console.log('adminId:', adminId);
+
+  //   if (!adminId) {
+  //     client.emit('error', 'Admin not authenticated');
+  //     return { status: 'error', message: 'Admin not authenticated' };
+  //   }
+
+  //   console.log('data:', typeof data);
+  //   console.log('data:', data);
+
+  //   if (!data.data.targetUserId) {
+  //     client.emit('error', 'Target user ID is required');
+  //     return { status: 'error', message: 'Target user ID is required' };
+  //   }
+
+  //   this.server.emit('notification', {
+  //     message: `Admin ${adminId} sent you a notification`,
+  //     userId: data.data.targetUserId,
+  //   });
+
+  //   return {
+  //     status: 'success',
+  //     message: `Notification sent to user ${data.data.targetUserId}`,
+  //   };
+  // }
+
+
   @SubscribeMessage('admin')
-  handleActionAdmin(
-    @MessageBody() data: any,
-    @ConnectedSocket() client: Socket,
-  ) {
-    const adminId = this.activeUsers.get(client.id);
-    console.log('adminId:', adminId);
+  async handleUpdateRole(
+  @MessageBody() data: UpdateRoleDto,
+  @ConnectedSocket() client: Socket,
+) {
+  const adminId = this.activeUsers.get(client.id);
+  console.log('Admin ID:', adminId);
 
-    if (!adminId) {
-      client.emit('error', 'Admin not authenticated');
-      return { status: 'error', message: 'Admin not authenticated' };
-    }
-
-    console.log('data:', typeof data);
-    console.log('data:', data);
-
-    if (!data.data.targetUserId) {
-      client.emit('error', 'Target user ID is required');
-      return { status: 'error', message: 'Target user ID is required' };
-    }
-
-    this.server.emit('notification', {
-      message: `Admin ${adminId} sent you a notification`,
-      userId: data.data.targetUserId,
-    });
-
-    return {
-      status: 'success',
-      message: `Notification sent to user ${data.data.targetUserId}`,
-    };
+  if (!adminId) {
+    client.emit('error', { message: 'Admin not authenticated' });
+    return { status: 'error', message: 'Admin not authenticated' };
   }
+
+  console.log('Received update_role payload:', data);
+
+
+  const updatedPermissions: UpdateRoleResponseDto = {
+    roleId: data.roleId,
+    permissions: [
+      {
+        resourceId: 'user',
+        action: 'read',
+        string: 1,
+      },
+      {
+        resourceId: 'finance',
+        action: 'update',
+        string: 2,
+      },
+    ],
+  };
+
+
+
+  // Respond back to the admin
+  client.emit('action_response', {
+    message: 'Role updated successfully',
+    status: 200,
+    data: updatedPermissions,
+  });
+
+  return {
+    status: 'success',
+    message: 'Role updated and notification sent successfully',
+  };
+}
+
 }
