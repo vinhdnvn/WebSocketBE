@@ -39,6 +39,12 @@ export class NotificationsGateway
       }
 
       this.activeUsers.set(client.id, user.uid);
+      // test notification to affected user
+      // if (user.uid){
+      //   this.server.to(user.uid).emit('notification', {
+      //     message: 'Welcome to the notification service',
+      //   });
+      // }
       console.log(`User ${user.uid} connected via WebSocket, client id :${client.id}`);
     } catch (error) {
       console.error('Error during connection:', error.message);
@@ -102,38 +108,6 @@ export class NotificationsGateway
     }
   }
 
-  // @SubscribeMessage('admin')
-  // handleActionAdmin(
-  //   @MessageBody() data: any,
-  //   @ConnectedSocket() client: Socket,
-  // ) {
-  //   const adminId = this.activeUsers.get(client.id);
-  //   console.log('adminId:', adminId);
-
-  //   if (!adminId) {
-  //     client.emit('error', 'Admin not authenticated');
-  //     return { status: 'error', message: 'Admin not authenticated' };
-  //   }
-
-  //   console.log('data:', typeof data);
-  //   console.log('data:', data);
-
-  //   if (!data.data.targetUserId) {
-  //     client.emit('error', 'Target user ID is required');
-  //     return { status: 'error', message: 'Target user ID is required' };
-  //   }
-
-  //   this.server.emit('notification', {
-  //     message: `Admin ${adminId} sent you a notification`,
-  //     userId: data.data.targetUserId,
-  //   });
-
-  //   return {
-  //     status: 'success',
-  //     message: `Notification sent to user ${data.data.targetUserId}`,
-  //   };
-  // }
-
 
   @SubscribeMessage('admin')
   async handleUpdateRole(
@@ -166,6 +140,7 @@ export class NotificationsGateway
       },
     ],
   };
+
 
 
 
