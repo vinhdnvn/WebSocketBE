@@ -8,8 +8,8 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { AuthService } from 'src/gateway/services/auth/auth.service';
-import { UpdateRoleDto, UpdateRoleResponseDto } from './services/notification/dto/update-role.dto';
+import { AuthService } from 'src/auth/auth.service';
+import { UpdateRoleDto, UpdateRoleResponseDto } from './dto/update-role.dto';
 
 @WebSocketGateway({ namespace: 'notifications', cors: true })
 export class NotificationsGateway
@@ -39,7 +39,7 @@ export class NotificationsGateway
       }
 
       this.activeUsers.set(client.id, user.uid);
-      console.log(`User ${user.uid} connected via WebSocket`);
+      console.log(`User ${user.uid} connected via WebSocket, client id :${client.id}`);
     } catch (error) {
       console.error('Error during connection:', error.message);
       client.disconnect();
@@ -72,6 +72,9 @@ export class NotificationsGateway
       switch (data.event) {
         case 'update_role':
           //  logic
+          // ========================================
+          // =======================================
+          // =======================================
           client.emit('action_response', {
             status: 'success',
             message: 'Role updated successfully',
@@ -80,6 +83,9 @@ export class NotificationsGateway
 
         case 'delete_user':
           // logic
+          // ========================================
+          // =======================================
+          // =======================================
           client.emit('action_response', {
             status: 'success',
             message: 'User deleted successfully',

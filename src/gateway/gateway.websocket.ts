@@ -37,19 +37,6 @@ export class GatewayWebsocket implements OnModuleInit {
     });
   }
 
-  @SubscribeMessage('newMessage')
-  onNewMessage(@MessageBody() body: any) {
-    console.log(body);
-    this.server.emit('onMessage', body);
-  }
-
-  @SubscribeMessage('logUserIni')
-  onMessage(@MessageBody() body: any) {
-    console.log('logUserIni', body);
-    console.log('user already logged in and connected');
-    this.server.emit('onMessage', body);
-  }
-
   @SubscribeMessage('subscribe')
   handleSubscribe(
     @MessageBody() data: { userId: string },

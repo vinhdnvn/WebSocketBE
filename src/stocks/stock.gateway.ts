@@ -7,6 +7,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import axios from 'axios';
 import { Socket } from 'socket.io';
 
 @WebSocketGateway({
@@ -60,9 +61,15 @@ export class StockGateway implements OnGatewayConnection, OnGatewayDisconnect {
       message: `User ${data.userId} successfully subscribed.`,
     };
   }
-
+  // test
   @SubscribeMessage('ping')
-  ping() {
-    this.server.emit('onMessage', 'pong');
+  async ping() {
+    // call axios api
+    const response = await axios.get(
+      'https://api.currencyapi.com/v3/status?apikey=cur_live_1dOAy6wOMemui1lMyRgVAvZvsW6PAzJtTcQnK1x8',
+    );
+    console.log(response.data.quotas.month.remaining);
+    const remain = response.data.quotas.month.remaining;
+    this.server.emit('onMessage', remain);
   }
 }
