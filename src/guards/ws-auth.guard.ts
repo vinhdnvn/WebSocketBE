@@ -1,9 +1,10 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-import { HttpService } from '../services/http.service';
+import { HttpService } from '../gateway/services/http.service';
+import { AuthService } from 'src/gateway/services/auth/auth.service';
 
 @Injectable()
 export class WsAuthGuard implements CanActivate {
-  constructor(private readonly httpService: HttpService) {}
+  constructor(private readonly authService: AuthService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const client = context.switchToWs().getClient();
@@ -14,13 +15,13 @@ export class WsAuthGuard implements CanActivate {
       return false;
     }
 
-    const user = await this.httpService.verifyUser(token);
+    const user = await this.authService.verifyUser(token);
     if (!user) {
       client.emit('error', 'Invalid token');
       return false;
     }
 
-    client.user = user; // Gắn user vào client để sử dụng sau
+    client.user = user; 
     return true;
   }
 }

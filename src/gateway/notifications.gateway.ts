@@ -8,7 +8,8 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { HttpService } from '../services/http.service';
+import { HttpService } from './services/http.service';
+import { AuthService } from 'src/gateway/services/auth/auth.service';
 
 @WebSocketGateway({ namespace: 'notifications', cors: true })
 export class NotificationsGateway
@@ -17,7 +18,10 @@ export class NotificationsGateway
   @WebSocketServer() server: Server;
 
   private activeUsers = new Map<string, string>();
-  constructor(private readonly httpService: HttpService) {}
+  constructor(private readonly httpService: HttpService, 
+    private readonly authService: AuthService,
+
+  ) {}
 
   async handleConnection(@ConnectedSocket() client: Socket) {
     try {
@@ -29,7 +33,7 @@ export class NotificationsGateway
         return;
       }
 
-      const user = await this.httpService.verifyUser(token);
+      const user = await this.authService.verifyUser(token);
 
       if (!user) {
         client.emit('error', 'Invalid token');

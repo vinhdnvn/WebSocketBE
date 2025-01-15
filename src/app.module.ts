@@ -5,10 +5,10 @@ import { GatewayModule } from './gateway/gateway.module';
 import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [GatewayModule, 
-
-      ConfigModule.forRoot({
-      isGlobal: true 
+  imports: [
+    GatewayModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
     }),
   ],
   controllers: [AppController],

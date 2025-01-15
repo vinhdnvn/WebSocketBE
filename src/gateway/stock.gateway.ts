@@ -9,7 +9,14 @@ import {
 } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 
-@WebSocketGateway({ namespace: 'stocks', cors: true })
+@WebSocketGateway({
+  namespace: 'stocks',
+  cors: {
+    origin: '*', 
+    methods: ['GET', 'POST'],
+    credentials: true, 
+  },
+})
 export class StockGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {
@@ -40,7 +47,6 @@ export class StockGateway
     client.join(`stocks:${data.userId}`);
    
 
-    // Gửi giá trị từ 1 đến 1000
     let count = 1;
     const interval = setInterval(() => {
       if (count > 1000) {
