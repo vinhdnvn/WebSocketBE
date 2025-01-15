@@ -169,7 +169,6 @@ export class NotificationsGateway
 
 
 
-  // Respond back to the admin
   client.emit('action_response', {
     message: 'Role updated successfully',
     status: 200,
