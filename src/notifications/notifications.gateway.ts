@@ -10,6 +10,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { AuthService } from 'src/auth/auth.service';
 import { UpdateRoleDto, UpdateRoleResponseDto } from './dto/update-role.dto';
+import { UserService } from 'src/users/user.service';
 
 @WebSocketGateway({ namespace: 'notifications', cors: true })
 export class NotificationsGateway
@@ -18,7 +19,9 @@ export class NotificationsGateway
   @WebSocketServer() server: Server;
 
   private activeUsers = new Map<string, string>();
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService,
+    private readonly userService: UserService,
+  ) {}
 
   async handleConnection(@ConnectedSocket() client: Socket) {
     try {
@@ -66,6 +69,16 @@ export class NotificationsGateway
     @ConnectedSocket() client: Socket,
   ) {
     data = JSON.parse(data);
+
+    const token = client.handshake.headers.authorization?.split(' ')[1];
+  
+    const dataResponse = await this.userService.getAllUserInfo( token);
+    console.log('All users:', dataResponse.data);
+    client.emit('all_users', {
+      message: 'All users fetched successfully',
+      data: dataResponse.data
+    });
+
     try {
       const userId = this.activeUsers.get(client.id);
       if (!userId) {

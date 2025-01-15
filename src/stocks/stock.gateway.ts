@@ -9,6 +9,7 @@ import {
 } from '@nestjs/websockets';
 import axios from 'axios';
 import { Socket } from 'socket.io';
+import { HttpService } from 'src/common/services/http.service';
 
 @WebSocketGateway({
   namespace: 'stocks',
@@ -19,6 +20,9 @@ import { Socket } from 'socket.io';
   },
 })
 export class StockGateway implements OnGatewayConnection, OnGatewayDisconnect {
+constructor(
+  private readonly httpService: HttpService,
+) {}
   @WebSocketServer() server;
   private connectedClients: Map<string, any> = new Map();
 
@@ -65,11 +69,11 @@ export class StockGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('ping')
   async ping() {
     // call axios api
-    const response = await axios.get(
-      'https://api.currencyapi.com/v3/status?apikey=cur_live_1dOAy6wOMemui1lMyRgVAvZvsW6PAzJtTcQnK1x8',
-    );
-    console.log(response.data.quotas.month.remaining);
-    const remain = response.data.quotas.month.remaining;
+    
+
+    const response = await this.httpService.get("https://api.currencyapi.com/v3/status?apikey=cur_live_1dOAy6wOMemui1lMyRgVAvZvsW6PAzJtTcQnK1x8");
+    console.log(response);
+    const remain = response;
     this.server.emit('onMessage', remain);
   }
 }
