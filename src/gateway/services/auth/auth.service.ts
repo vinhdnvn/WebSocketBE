@@ -18,15 +18,13 @@ export class AuthService {
       return null;
     }
   }
-  async verifyUser(token: string):Promise<any>  {
-  try {
-    const decoded = jwt.verify(token, this.secretKey);
-    return decoded;
-
-  } catch (error) {
-  console.error('Failed to verify user:', error.message);
-  return null;    
-  } 
+  async verifyUser(token: string): Promise<any> {
+    try {
+      const decoded = jwt.verify(token, this.secretKey);
+      return decoded;
+    } catch (error) {
+      console.error('Failed to verify user:', error.message);
+      return null;
+    }
   }
-
 }

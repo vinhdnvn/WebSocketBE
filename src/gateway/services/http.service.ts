@@ -1,4 +1,3 @@
-
 import { Injectable } from '@nestjs/common';
 import axios, { AxiosRequestConfig } from 'axios';
 
@@ -14,7 +13,11 @@ export class HttpService {
     }
   }
 
-  async post<T>(url: string, data: any, config?: AxiosRequestConfig): Promise<T> {
+  async post<T>(
+    url: string,
+    data: any,
+    config?: AxiosRequestConfig,
+  ): Promise<T> {
     try {
       const response = await axios.post<T>(url, data, config);
       return response.data;
@@ -23,7 +26,11 @@ export class HttpService {
       throw error;
     }
   }
-  async put<T>(url: string, data: any, config?: AxiosRequestConfig): Promise<T> {
+  async put<T>(
+    url: string,
+    data: any,
+    config?: AxiosRequestConfig,
+  ): Promise<T> {
     try {
       const response = await axios.put<T>(url, data, config);
       return response.data;
@@ -41,7 +48,11 @@ export class HttpService {
       throw error;
     }
   }
-  async patch<T>(url: string, data: any, config?: AxiosRequestConfig): Promise<T> {
+  async patch<T>(
+    url: string,
+    data: any,
+    config?: AxiosRequestConfig,
+  ): Promise<T> {
     try {
       const response = await axios.patch<T>(url, data, config);
       return response.data;
@@ -50,5 +61,4 @@ export class HttpService {
       throw error;
     }
   }
-  
 }

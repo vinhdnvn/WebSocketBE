@@ -15,7 +15,7 @@ import { UserService } from 'src/gateway/services/user/user.service';
     StockGateway,
     AuthService,
     NotificationService,
-    UserService
+    UserService,
   ],
 })
 export class GatewayModule {}

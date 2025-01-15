@@ -8,7 +8,6 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { HttpService } from './services/http.service';
 import { AuthService } from 'src/gateway/services/auth/auth.service';
 
 @WebSocketGateway({ namespace: 'notifications', cors: true })
@@ -18,10 +17,7 @@ export class NotificationsGateway
   @WebSocketServer() server: Server;
 
   private activeUsers = new Map<string, string>();
-  constructor(private readonly httpService: HttpService, 
-    private readonly authService: AuthService,
-
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   async handleConnection(@ConnectedSocket() client: Socket) {
     try {
@@ -57,7 +53,6 @@ export class NotificationsGateway
     }
   }
 
- 
   @SubscribeMessage('action')
   async handleAction(
     @MessageBody() data: any,
@@ -101,35 +96,34 @@ export class NotificationsGateway
   }
 
   @SubscribeMessage('admin')
-  handleActionAdmin(@MessageBody() data: any, @ConnectedSocket() client: Socket) {
-     const adminId = this.activeUsers.get(client.id);
-     const token = client.handshake.headers.authorization?.split(' ')[1];
-     const userId = '123u29833972'
-     if (!userId) {
-      console.error('Invalid token');
-      client.disconnect();
-      return;
-    }
+  handleActionAdmin(
+    @MessageBody() data: any,
+    @ConnectedSocket() client: Socket,
+  ) {
+    const adminId = this.activeUsers.get(client.id);
+    console.log('adminId:', adminId);
+
     if (!adminId) {
       client.emit('error', 'Admin not authenticated');
       return { status: 'error', message: 'Admin not authenticated' };
     }
 
-    
-    this.notifyUser(data.targetUserId, `Action "${data.action}" performed by admin ${adminId}`);
+    console.log('data:', typeof data);
+    console.log('data:', data);
 
-    return { status: 'success', message: `Notification sent to user ${data.targetUserId}` };
-  }
-
-   private notifyUser(userId: string, message: string) {
-    for (const [socketId, id] of this.activeUsers.entries()) {
-      if (id === userId) {
-        this.server.to(socketId).emit('notification', { message });
-        console.log(`Notification sent to user ${userId}: ${message}`);
-        return;
-      }
+    if (!data.data.targetUserId) {
+      client.emit('error', 'Target user ID is required');
+      return { status: 'error', message: 'Target user ID is required' };
     }
-    console.warn(`User ${userId} not connected`);
+
+    this.server.emit('notification', {
+      message: `Admin ${adminId} sent you a notification`,
+      userId: data.data.targetUserId,
+    });
+
+    return {
+      status: 'success',
+      message: `Notification sent to user ${data.data.targetUserId}`,
+    };
   }
-   
 }

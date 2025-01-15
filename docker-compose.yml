@@ -1,0 +1,25 @@
+# version: '3.8'
+# services:
+#   app:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile
+#     ports:
+#       - '3000:3000'
+#     environment:
+#       BACKEND_URL: 'http://localhost:5001/api' 
+#       SECRET_KEY: 'access-token-secret'
+
+version: '3.8'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '${PORT}:3000' # Sử dụng biến APP_PORT từ file .env
+    environment:
+      BACKEND_URL: '${BACKEND_URL}' # Lấy BACKEND_URL từ file .env
+      SECRET_KEY: '${SECRET_KEY}'   # Lấy SECRET_KEY từ file .env
+    env_file:
+      - .env  # Chỉ định file .env để lấy biến môi trường

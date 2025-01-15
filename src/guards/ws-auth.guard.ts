@@ -1,5 +1,5 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-import { HttpService } from '../gateway/services/http.service';
+
 import { AuthService } from 'src/gateway/services/auth/auth.service';
 
 @Injectable()
@@ -21,7 +21,7 @@ export class WsAuthGuard implements CanActivate {
       return false;
     }
 
-    client.user = user; 
+    client.user = user;
     return true;
   }
 }
