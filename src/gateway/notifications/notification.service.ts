@@ -3,7 +3,6 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from 'src/common/services/http.service';
 
-
 @Injectable()
 export class NotificationService {
   private backendUrl: string;

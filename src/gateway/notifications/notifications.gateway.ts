@@ -10,7 +10,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { AuthService } from 'src/auth/auth.service';
 import { UpdateRoleDto, UpdateRoleResponseDto } from './dto/update-role.dto';
-import { UserService } from 'src/users/user.service';
+import { UserService } from 'src/gateway/users/user.service';
 
 @WebSocketGateway({ namespace: 'notifications', cors: true })
 export class NotificationsGateway
@@ -19,7 +19,8 @@ export class NotificationsGateway
   @WebSocketServer() server: Server;
 
   private activeUsers = new Map<string, string>();
-  constructor(private readonly authService: AuthService,
+  constructor(
+    private readonly authService: AuthService,
     private readonly userService: UserService,
   ) {}
 
@@ -48,7 +49,9 @@ export class NotificationsGateway
       //     message: 'Welcome to the notification service',
       //   });
       // }
-      console.log(`User ${user.uid} connected via WebSocket, client id :${client.id}`);
+      console.log(
+        `User ${user.uid} connected via WebSocket, client id :${client.id}`,
+      );
     } catch (error) {
       console.error('Error during connection:', error.message);
       client.disconnect();
@@ -71,12 +74,12 @@ export class NotificationsGateway
     data = JSON.parse(data);
 
     const token = client.handshake.headers.authorization?.split(' ')[1];
-  
-    const dataResponse = await this.userService.getAllUserInfo( token);
-    console.log('All users:', dataResponse.data);
+
+    const dataResponse = await this.userService.getAllUserInfo(token);
+
     client.emit('all_users', {
       message: 'All users fetched successfully',
-      data: dataResponse.data
+      data: dataResponse.data,
     });
 
     try {
@@ -121,52 +124,46 @@ export class NotificationsGateway
     }
   }
 
-
   @SubscribeMessage('admin')
   async handleUpdateRole(
-  @MessageBody() data: UpdateRoleDto,
-  @ConnectedSocket() client: Socket,
-) {
-  const adminId = this.activeUsers.get(client.id);
-  console.log('Admin ID:', adminId);
+    @MessageBody() data: UpdateRoleDto,
+    @ConnectedSocket() client: Socket,
+  ) {
+    const adminId = this.activeUsers.get(client.id);
+    console.log('Admin ID:', adminId);
 
-  if (!adminId) {
-    client.emit('error', { message: 'Admin not authenticated' });
-    return { status: 'error', message: 'Admin not authenticated' };
+    if (!adminId) {
+      client.emit('error', { message: 'Admin not authenticated' });
+      return { status: 'error', message: 'Admin not authenticated' };
+    }
+
+    console.log('Received update_role payload:', data);
+
+    const updatedPermissions: UpdateRoleResponseDto = {
+      roleId: data.roleId,
+      permissions: [
+        {
+          resourceId: 'user',
+          action: 'read',
+          string: 1,
+        },
+        {
+          resourceId: 'finance',
+          action: 'update',
+          string: 2,
+        },
+      ],
+    };
+
+    client.emit('action_response', {
+      message: 'Role updated successfully',
+      status: 200,
+      data: updatedPermissions,
+    });
+
+    return {
+      status: 'success',
+      message: 'Role updated and notification sent successfully',
+    };
   }
-
-  console.log('Received update_role payload:', data);
-
-
-  const updatedPermissions: UpdateRoleResponseDto = {
-    roleId: data.roleId,
-    permissions: [
-      {
-        resourceId: 'user',
-        action: 'read',
-        string: 1,
-      },
-      {
-        resourceId: 'finance',
-        action: 'update',
-        string: 2,
-      },
-    ],
-  };
-
-
-
-
-  client.emit('action_response', {
-    message: 'Role updated successfully',
-    status: 200,
-    data: updatedPermissions,
-  });
-
-  return {
-    status: 'success',
-    message: 'Role updated and notification sent successfully',
-  };
-}
-
 }
